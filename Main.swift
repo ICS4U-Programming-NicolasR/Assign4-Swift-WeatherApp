@@ -45,7 +45,7 @@ class CurrentWeatherData: WeatherData {
         return Double.nan
     }
 
-    // similar to above but with windSpeed
+    // This method and the ones below are all pretty similar any differences I commented on
     func getWindSpeed(jsonResponse: String) -> Double {
         if let startIndex = jsonResponse.range(of: "\"wind_speed\":")?.upperBound {
             let commaIndex = jsonResponse[startIndex...].firstIndex(of: ",") ?? jsonResponse.endIndex
@@ -55,7 +55,6 @@ class CurrentWeatherData: WeatherData {
         return Double.nan
     }
 
-    // similar to above but with precipitation
     func getPrecipitation(jsonResponse: String) -> Double {
         if let startIndex = jsonResponse.range(of: "\"precip\":")?.upperBound {
             let commaIndex = jsonResponse[startIndex...].firstIndex(of: ",") ?? jsonResponse.endIndex
@@ -65,7 +64,6 @@ class CurrentWeatherData: WeatherData {
         return Double.nan
     }
 
-    // similar to above but with humidity
     func getHumidity(jsonResponse: String) -> Double {
         if let startIndex = jsonResponse.range(of: "\"humidity\":")?.upperBound {
             let commaIndex = jsonResponse[startIndex...].firstIndex(of: ",") ?? jsonResponse.endIndex
@@ -75,7 +73,6 @@ class CurrentWeatherData: WeatherData {
         return Double.nan
     }
 
-    // similar to above but with pressure
     func getPressure(jsonResponse: String) -> Double {
         if let startIndex = jsonResponse.range(of: "\"pressure\":")?.upperBound {
             let commaIndex = jsonResponse[startIndex...].firstIndex(of: ",") ?? jsonResponse.endIndex
@@ -85,7 +82,6 @@ class CurrentWeatherData: WeatherData {
         return Double.nan
     }
 
-    // similar to above but with cloudCover
     func getCloudCover(jsonResponse: String) -> Double {
         if let startIndex = jsonResponse.range(of: "\"cloudcover\":")?.upperBound {
             let commaIndex = jsonResponse[startIndex...].firstIndex(of: ",") ?? jsonResponse.endIndex
@@ -113,7 +109,6 @@ class CurrentWeatherData: WeatherData {
         return ""
     }
 
-    // similar to above but with visibility
     func getVisibility(jsonResponse: String) -> Double {
         if let startIndex = jsonResponse.range(of: "\"visibility\":")?.upperBound {
             let commaIndex = jsonResponse[startIndex...].firstIndex(of: ",") ?? jsonResponse.endIndex
@@ -123,7 +118,6 @@ class CurrentWeatherData: WeatherData {
         return Double.nan
     }
 
-    // similar to above but with windDir
     func getWindDir(jsonResponse: String) -> String {
         if let startIndex = jsonResponse.range(of: "\"wind_degree\":")?.upperBound {
             let commaIndex = jsonResponse[startIndex...].firstIndex(of: ",") ?? jsonResponse.endIndex
@@ -152,7 +146,6 @@ class CurrentWeatherData: WeatherData {
         return ""
     }
 
-    // similar to above but with location
     func getLocation(jsonResponse: String) -> String {
         var city = ""
         var country = ""
@@ -179,7 +172,6 @@ class CurrentWeatherData: WeatherData {
         return "\(city), \(region), \(country)"
     }
 
-    // similar to above but with time
     func getTime(jsonResponse: String) -> String {
         if let startIndex = jsonResponse.range(of: "\"localtime\":")?.lowerBound {
             let commaIndex = jsonResponse[startIndex...].firstIndex(of: ",") ?? jsonResponse.endIndex
@@ -191,7 +183,6 @@ class CurrentWeatherData: WeatherData {
         return ""
     }
 
-    // similar to above but with weather Description
     func getDescription(jsonResponse: String) -> String {
         if let startIndex = jsonResponse.range(of: "\"weather_descriptions\":")?.lowerBound {
             let commaIndex = jsonResponse[startIndex...].firstIndex(of: ",") ?? jsonResponse.endIndex
@@ -203,7 +194,6 @@ class CurrentWeatherData: WeatherData {
         return ""
     }
 
-    // similar to above but with feelsLikeTemperature
     func getFeelsLikeTemperature(jsonResponse: String) -> Double {
         if let startIndex = jsonResponse.range(of: "\"feelslike\":")?.upperBound {
             let commaIndex = jsonResponse[startIndex...].firstIndex(of: ",") ?? jsonResponse.endIndex
@@ -247,8 +237,8 @@ class UserSystem {
     // create the users list and load the data set
     private var users: [String: User]
     private let userDataFile = "users.txt"
-    // load the file data
 
+    // load the file data
     private func loadUserData() {
         do {
             let fileURL = try getFileURL()
@@ -278,9 +268,8 @@ class UserSystem {
             return
         }
         var fileContent = ""
-        // see's all the usernames in users list
+        // see's all the usernames in users list then appends to fileContent
         for (username, user) in users {
-            // gets ready to append to the fileContent
             let password = user.getPassword()
             let email = user.getEmail() ?? ""
             let line = "\(username),\(password),\(email)\n"
@@ -329,11 +318,10 @@ class UserSystem {
 
 // struct acts as the main class
 struct WeatherExample {
-    // api keys to access the server
+    // api keys to access the server and base url
     private static let weatherApiKey = "403850bf40ca68508d00db1ba3507123"
     private static let emailApiKey =
     "45B55A71ECD2C835E3A7CFFD1B122A17ABFC8902E1576DFF0E6F9C9B173A1031590AB51C19D471768F4C74EC596AB0BE"
-    // base URL for weatherstack
     private static let baseUrl = "http://api.weatherstack.com/"
     // read the input file and separate it into different values
     private static func readCustomInfoFromFile(filePath: String) -> [String]? {
@@ -348,14 +336,12 @@ struct WeatherExample {
     }
 
     static func main() {
-        // Read custom information from file
+        // Read custom information from file if there is too many run an error
         if let customInfo = readCustomInfoFromFile(filePath: "input.txt") {
-            // if there is an incorrect amount it displays invalid
             if customInfo.count < 4 {
                 print("Invalid custom information file.")
                 return
             }
-            // set all the answers
             let username = customInfo[0]
             let password = customInfo[1]
             let city = customInfo[2]
@@ -364,9 +350,7 @@ struct WeatherExample {
             userSystem.addUser(username: username, password: password)
             if userSystem.authenticateUser(username: username, password: password) {
                 print("Authentication successful for user: \(username)")
-                print("Welcome, \(username)!")
-                print()
-                // set the current weather data object.
+                print("Welcome, \(username)!\n")
                 let currentWeatherData = CurrentWeatherData(apiKey: weatherApiKey, baseUrl: baseUrl + "current")
                 // try to get all the info needed
                 do {
