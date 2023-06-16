@@ -23,7 +23,6 @@ class WeatherData {
         }
         return nil
     }
-
 }
 
 // currentWeatherData class child class to WeatherData
@@ -33,7 +32,6 @@ class CurrentWeatherData: WeatherData {
         super.init(apiKey: apiKey, baseUrl: baseUrl)
     }
 
-    // get the temperature
     func getTemperature(jsonResponse: String) -> Double {
         // set the startIndex to the upperBound of temperature
         if let startIndex = jsonResponse.range(of: "\"temperature\":")?.upperBound {
@@ -44,7 +42,6 @@ class CurrentWeatherData: WeatherData {
             // return the string
             return Double(temperatureString) ?? Double.nan
         }
-        // return nan if it doesn't work
         return Double.nan
     }
 
@@ -160,21 +157,18 @@ class CurrentWeatherData: WeatherData {
         var city = ""
         var country = ""
         var region = ""
-        
         if let startIndex = jsonResponse.range(of: "\"name\":")?.lowerBound {
             let commaIndex = jsonResponse[startIndex...].firstIndex(of: ",") ?? jsonResponse.endIndex
             let adjustedStartIndex = jsonResponse.index(startIndex, offsetBy: 8)
             let adjustedEndIndex = jsonResponse.index(commaIndex, offsetBy: -1)
             city = String(jsonResponse[adjustedStartIndex..<adjustedEndIndex])
         }
-
         if let startIndex = jsonResponse.range(of: "\"country\":")?.lowerBound {
             let commaIndex = jsonResponse[startIndex...].firstIndex(of: ",") ?? jsonResponse.endIndex
             let adjustedStartIndex = jsonResponse.index(startIndex, offsetBy: 11)
             let adjustedEndIndex = jsonResponse.index(commaIndex, offsetBy: -1)
             country = String(jsonResponse[adjustedStartIndex..<adjustedEndIndex])
         }
-
         if let startIndex = jsonResponse.range(of: "\"region\":")?.lowerBound {
             let commaIndex = jsonResponse[startIndex...].firstIndex(of: ",") ?? jsonResponse.endIndex
             let adjustedStartIndex = jsonResponse.index(startIndex, offsetBy: 10)
@@ -221,7 +215,6 @@ class CurrentWeatherData: WeatherData {
 }
 
 class User {
-    // fields
     private var username: String
     private var password: String
     private var email: String?
@@ -250,22 +243,18 @@ class User {
     }
 }
 
-
 class UserSystem {
-    // create the users list
+    // create the users list and load the data set
     private var users: [String: User]
-    // set the data set file name
     private let userDataFile = "users.txt"
-
     // load the file data
+
     private func loadUserData() {
         do {
             let fileURL = try getFileURL()
             let fileContent = try String(contentsOf: fileURL, encoding: .utf8)
             let lines = fileContent.components(separatedBy: .newlines)
-
             for line in lines {
-
                 let parts = line.components(separatedBy: ",")
                 if parts.count == 3 {
                     let username = parts[0]
@@ -281,9 +270,14 @@ class UserSystem {
 
     // method to save the user data 
     private func saveUserData() {
-        let fileURL = try! getFileURL()
+        let fileURL: URL
+        do {
+            fileURL = try getFileURL()
+        } catch {
+            print("failed")
+            return
+        }
         var fileContent = ""
-        
         // see's all the usernames in users list
         for (username, user) in users {
             // gets ready to append to the fileContent
@@ -292,7 +286,6 @@ class UserSystem {
             let line = "\(username),\(password),\(email)\n"
             fileContent.append(line)
         }
-        
         do {
             // writes to the file
             try fileContent.write(to: fileURL, atomically: true, encoding: .utf8)
@@ -304,7 +297,8 @@ class UserSystem {
     // get the file's URL
     private func getFileURL() throws -> URL {
         let fileManager = FileManager.default
-        let documentDirectory = try fileManager.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: false)
+        let documentDirectory = try fileManager.url(
+            for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: false)
         return documentDirectory.appendingPathComponent(userDataFile)
     }
 
@@ -333,15 +327,14 @@ class UserSystem {
     }
 }
 
-
 // struct acts as the main class
 struct WeatherExample {
     // api keys to access the server
-    private static let WEATHER_API_KEY = "403850bf40ca68508d00db1ba3507123"
-    private static let EMAIL_API_KEY = "45B55A71ECD2C835E3A7CFFD1B122A17ABFC8902E1576DFF0E6F9C9B173A1031590AB51C19D471768F4C74EC596AB0BE"
+    private static let weatherApiKey = "403850bf40ca68508d00db1ba3507123"
+    private static let emailApiKey =
+    "45B55A71ECD2C835E3A7CFFD1B122A17ABFC8902E1576DFF0E6F9C9B173A1031590AB51C19D471768F4C74EC596AB0BE"
     // base URL for weatherstack
-    private static let BASE_URL = "http://api.weatherstack.com/"
-
+    private static let baseUrl = "http://api.weatherstack.com/"
     // read the input file and separate it into different values
     private static func readCustomInfoFromFile(filePath: String) -> [String]? {
         do {
@@ -362,12 +355,10 @@ struct WeatherExample {
                 print("Invalid custom information file.")
                 return
             }
-
             // set all the answers
             let username = customInfo[0]
             let password = customInfo[1]
             let city = customInfo[2]
-
             let userSystem = UserSystem()
             // add the user and authenticate to see if the password is correct
             userSystem.addUser(username: username, password: password)
@@ -375,14 +366,14 @@ struct WeatherExample {
                 print("Authentication successful for user: \(username)")
                 print("Welcome, \(username)!")
                 print()
-
                 // set the current weather data object.
-                let currentWeatherData = CurrentWeatherData(apiKey: WEATHER_API_KEY, baseUrl: BASE_URL + "current")
+                let currentWeatherData = CurrentWeatherData(apiKey: weatherApiKey, baseUrl: baseUrl + "current")
                 // try to get all the info needed
                 do {
                     if let currentJsonResponse = try currentWeatherData.getWeatherData(city: city) {
                         let currentTemperature = currentWeatherData.getTemperature(jsonResponse: currentJsonResponse)
-                        let currentFeelsLikeTemperature = currentWeatherData.getFeelsLikeTemperature(jsonResponse: currentJsonResponse)
+                        let currentFeelsLikeTemperature =
+                         currentWeatherData.getFeelsLikeTemperature(jsonResponse: currentJsonResponse)
                         let location = currentWeatherData.getLocation(jsonResponse: currentJsonResponse)
                         let time = currentWeatherData.getTime(jsonResponse: currentJsonResponse)
                         let weather = currentWeatherData.getDescription(jsonResponse: currentJsonResponse)
@@ -394,13 +385,15 @@ struct WeatherExample {
                         let visibility = currentWeatherData.getVisibility(jsonResponse: currentJsonResponse)
                         let cloudCover = currentWeatherData.getCloudCover(jsonResponse: currentJsonResponse)
                         let uvLevel = currentWeatherData.getUvLevel(jsonResponse: currentJsonResponse)
-
                         // print it out
                         print("The weather in \(location) at \(time) is currently:")
-                        print("\(weather) with a temperature of \(currentTemperature)°C and a feels like temperature of \(currentFeelsLikeTemperature)°C.")
+                        print("\(weather) with a temperature of \(currentTemperature)°C")
+                        print("and feels like \(currentFeelsLikeTemperature)°C.")
                         print("There is a \(windDir) wind going through at \(windSpeed)km/h")
-                        print("The amount of precipitation predicted is \(precip)mm with a humidity of \(humidity)g.m^-3")
-                        print("The pressure in the area is \(pressure) pascals. The visibility around you is \(visibility)km")
+                        print("The amount of precipitation predicted is \(precip)mm")
+                        print("with a humidity of \(humidity)g.m^-3")
+                        print("The pressure in the area is \(pressure) pascals.")
+                        print("The visibility around you is \(visibility)km")
                         print("With \(cloudCover)% of the sky under cloud.")
                         print("The UV radiation level right now is \(uvLevel)")
                         print()
@@ -415,9 +408,4 @@ struct WeatherExample {
     }
 }
 
-func main() {
-    // Call the main method of WeatherExample class
-    WeatherExample.main();
-}
-
-main()
+WeatherExample.main()
